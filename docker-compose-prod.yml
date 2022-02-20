@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+
+  myapi-frontend:
+    container_name: myapi-backend-java-prod
+    image: myapi-backend-java:prod
+    ports:
+      - 4567:4567
