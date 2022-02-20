@@ -1,0 +1,1 @@
+curl -i -X POST -H "Content-Type: application/json" -d '{"key1":"value"}' -u user:password http://localhost:4567/greeting

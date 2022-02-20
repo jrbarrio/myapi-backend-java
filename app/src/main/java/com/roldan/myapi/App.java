@@ -1,6 +1,8 @@
 package com.roldan.myapi;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.roldan.myapi.controller.HelloController;
+import com.roldan.myapi.controller.UserController;
 import org.json.JSONObject;
 
 import static spark.Spark.*;
@@ -8,7 +10,18 @@ import static spark.Spark.*;
 public class App {
     public static void main(String[] args) {
 
+        var userController = new UserController();
         var helloController = new HelloController();
+
+        var rateLimiter = RateLimiter.create(2.0d);
+        before((request, response) -> {
+            if (!rateLimiter.tryAcquire()) {
+                response.header("Retry-After", "2");
+                halt(429);
+            }
+        });
+
+        before(userController::authenticate);
 
         before(((request, response) -> {
             var method = request.requestMethod();
@@ -20,6 +33,7 @@ public class App {
             }
         }));
 
+        before("/greeting", userController::requireAuthentication);
         get("/greeting", helloController::greet);
         put("/greeting", helloController::greet);
         post("/greeting", helloController::greet);
